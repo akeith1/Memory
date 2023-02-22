@@ -1,13 +1,16 @@
 import React, {useEffect} from 'react';
 
-const Header = ({handleNewGame, wins}) => {
-    useEffect(() => {document.title = `${wins} wins`}, [wins]);
+const Header = ({handleNewGame, wins, tries, gameOver}) => {
+    useEffect(() => {document.title = gameOver ? 'Game Over!' : `${wins} wins`}, [wins, gameOver]);
 
     return (
 
         <header className="header">
-            <h4>{wins} wins</h4>
-            <h3> Memory Game</h3>
+        { gameOver ? <h3>Game Over</h3> : 
+            <>
+            <h4>{wins} wins</h4> <h4>{tries} tries left</h4><h3> Memory Game</h3></>
+            }
+            
             <button onClick={handleNewGame}>New Game</button>
 
         </header>

@@ -11,6 +11,8 @@ function App() {
   const [pickTwo, setPickTwo] = useState(null); // Second selection
   const [disabled, setDisabled] = useState(false); // Delay handler
   const [setBadge, clearBadge] = useAppBadge(); // Handles app badge
+  const [tries, setTries] = useState(cards.length); //tries left to win the current game
+  const [gameOver, setGameOver] = useState(false);
 
   // Handle card selection
   const handleClick = (card) => {
@@ -31,6 +33,8 @@ function App() {
     clearBadge();
     handleTurn();
     setCards(shuffle);
+    setTries(cards.length);
+    setGameOver(false);
   };
 
   // Used for selection and match handling
@@ -54,11 +58,13 @@ function App() {
         });
         handleTurn();
       } else {
+      
         // Prevent new selections until after delay
         setDisabled(true);
         // Add delay between selections
         pickTimer = setTimeout(() => {
           handleTurn();
+          setTries(tries -1);
         }, 1000);
       }
     }
@@ -66,11 +72,12 @@ function App() {
     return () => {
       clearTimeout(pickTimer);
     };
-  }, [cards, pickOne, pickTwo, setBadge, wins]);
+  }, [cards, pickOne, pickTwo, setBadge, tries]);
 
 
   // If player has found all matches, handle accordingly
   useEffect(() => {
+    if(!gameOver){
     // Check for any remaining card matches
     const checkWin = cards.filter((card) => !card.matched);
 
@@ -81,12 +88,27 @@ function App() {
       setBadge();
       handleTurn();
       setCards(shuffle);
+      setTries(cards.length);
     }
-  }, [cards, setBadge, wins]);
+  }
+  }, [cards, setBadge, wins, gameOver]);
+
+ //If you have run out of tries -- game over
+ useEffect(() => {
+    if(tries < 1){
+      setGameOver(true);
+      setCards((prevCards) => {
+        return prevCards.map((card) => {
+          return {...card, onClick: null}
+        })
+      })
+    }
+  }, [tries]);
+
 
   return (
     <>
-      <Header handleNewGame={handleNewGame} wins={wins} />
+      <Header handleNewGame={handleNewGame} wins={wins} tries = {tries} gameOver= {gameOver} />
       <div className="grid">
         {cards.map((card) => {
           // Destructured card properties
